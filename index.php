@@ -21,4 +21,4 @@ $model = new MySQLModel();
 $model->fetchMode(4);
 echo $model->varName;
 
-var_dump($model->insertNew(['varName'=>'Muska','varAddress'=>'MurMuska'],10));
+var_dump($model->insertNew(['varName' => 'Muska', 'varAddress' => 'MurMuska'], 10));

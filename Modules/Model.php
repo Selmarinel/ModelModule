@@ -154,7 +154,7 @@ abstract class Model
         if (empty($sets)) {
             return null;
         }
-        $values = "'" . str_replace(',',"','",implode(',', array_values($sets))) . "'";
+        $values = "'" . str_replace(',', "','", implode(',', array_values($sets))) . "'";
         if (!$id) {
             return mysqli_query($link,
                 'INSERT INTO ' . $table_name . ' (' . implode(',', array_keys($sets)) . ')' .
@@ -162,14 +162,14 @@ abstract class Model
             );
         }
         $_query = array();
-        foreach ($sets as $set=>$value){
+        foreach ($sets as $set => $value) {
             $_query[] = $set . "='" . $value . "'";
         }
         return mysqli_query($link,
             'UPDATE ' . $table_name .
-            ' SET ' . implode(', ',$_query) .
-            ' WHERE '. $this->primary_key .'='. $id
-            );
+            ' SET ' . implode(', ', $_query) .
+            ' WHERE ' . $this->primary_key . '=' . $id
+        );
 
     }
 }
