@@ -1,5 +1,6 @@
 <?php
-namespace Modules;
+
+namespace Core;
 
 abstract class Model
 {
@@ -86,7 +87,7 @@ abstract class Model
     public function pushData(Array $data)
     {
         foreach ($data as $key => $value) {
-            if (array_key_exists($key, $this->attributes)) {
+            if (array_key_exists($key, $this->attributes) && $key != $this->primary_key) {
                 $this->data[$key] = $value;
             }
         }
@@ -103,7 +104,7 @@ abstract class Model
             return json_encode($this->data);
         }
         if ($OPTION == self::PAR_DUMP) {
-            return var_dump($this->data);
+            return die(var_dump($this->data));
         }
         return $this->data;
     }
@@ -136,39 +137,66 @@ abstract class Model
         }
     }
 
-    /**
-     * @param $link
-     * @param array $sets
-     * @param null $id
-     * @param null $table_name
-     * @return bool|\mysqli_result|null
-     */
-    public function insertOrUpdateData($link, Array $sets = array(), $id = null, $table_name = null)
+    public function updateData($link,$sets, $id = null, $table_name = null)
     {
-        if (!$link) {
-            return null;
-        }
+        $table_name = $this->_prepare($link, $table_name, $sets, $id);
         if (!$table_name) {
-            $table_name = $this->table_name;
-        }
-        if (empty($sets)) {
-            return null;
-        }
-        $values = "'" . str_replace(',', "','", implode(',', array_values($sets))) . "'";
-        if (!$id) {
-            return mysqli_query($link,
-                'INSERT INTO ' . $table_name . ' (' . implode(',', array_keys($sets)) . ')' .
-                ' VALUES (' . $values . ')'
-            );
-        }
+             return null;
+        };
         $_query = array();
-        foreach ($sets as $set => $value) {
+        foreach ($this->data as $set => $value) {
             $_query[] = $set . "='" . $value . "'";
         }
         return mysqli_query($link,
             'UPDATE ' . $table_name .
             ' SET ' . implode(', ', $_query) .
             ' WHERE ' . $this->primary_key . '=' . $id
+        );
+
+    }
+
+    /**
+     * @param $link
+     * @param $table_name
+     * @param null $sets
+     * @param null $id
+     * @return string|null
+     */
+    private function _prepare($link, $table_name, $sets = null, $id = null)
+    {
+        if (!$link) {
+            return null;
+        }
+        if (!$table_name) {
+            return $table_name = $this->table_name;
+        }
+
+        if ($sets) {
+            $this->pushData($sets);
+        }
+
+        $key = $this->primary_key;
+
+        if ($id) {
+            $this->$key = $id;
+        }
+
+        if (empty($this->data)) {
+            return null;
+        }
+        return $table_name;
+    }
+
+    public function insertData($link, $sets = null, $table_name = null)
+    {
+        $table_name = $this->_prepare($link, $table_name, $sets);
+        if (!$table_name) {
+            return null;
+        };
+        $values = "'" . str_replace(',', "','", implode(',', array_values($this->data))) . "'";
+        return mysqli_query($link,
+            'INSERT INTO ' . $table_name . ' (' . implode(',', array_keys($this->data)) . ')' .
+            ' VALUES (' . $values . ')'
         );
 
     }

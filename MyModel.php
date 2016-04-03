@@ -1,9 +1,7 @@
 <?php
-require_once('Modules/Model.php');
-
-use Modules\Model;
+use Core\Model;
 
 class MyModel extends Model
 {
-    protected $attributes = array('id', 'name');
+    protected $attributes = array('id', 'name','name');
 }
